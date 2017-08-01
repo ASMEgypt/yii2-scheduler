@@ -13,6 +13,10 @@
   ],
   "minimum-stability": "stable",
   "require": {
+    "execut/yii2-base": "*",
+    "execut/yii2-migration": "*",
+    "execut/yii2-actions": "*",
+    "execut/yii2-navigation": "dev-extending",
     "roopz/yii2-imap": "dev-master",
     "dhtmlx/scheduler-helper": "dev-fix-bug as 1.2.0",
     "dhtmlx/connector-php": "~3.0"
