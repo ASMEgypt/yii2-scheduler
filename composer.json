@@ -1,6 +1,5 @@
 {
   "name": "execut/yii2-scheduler",
-  "version": "0.0.1",
   "description": "Scheduler module for yii2",
   "keywords": ["yii2", "yii2 scheduler", "schedule"],
   "homepage": "https://github.com/execut/yii2-import-scheduler",
