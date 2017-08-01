@@ -1,0 +1,132 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: execut
+ * Date: 12/1/16
+ * Time: 5:03 PM
+ */
+
+namespace execut\scheduler\components;
+
+
+class Helper extends \DHTMLX_Scheduler\Helper
+{
+    private $dsn = null;
+    private $_dbsm, $_host, $_db_name, $_user, $_password, $_table_name;
+    private $_PDO;
+
+    public function __construct($configs = array())
+    {
+        if (isset($configs["dsn"])) {
+            $this->dsn = $configs["dsn"];
+        } else {
+            $this->_dbsm = isset($configs["dbsm"]) ? $configs["dbsm"] : "mysql";
+            $this->_host = isset($configs["host"]) ? $configs["host"] : "localhost";
+            $this->_db_name = $configs["db_name"];
+        }
+
+        $this->_user = $configs["user"];
+        $this->_password = $configs["password"];
+        $this->_table_name = $configs["table_name"];
+    }
+
+    protected function getTableName()
+    {
+        return $this->_table_name;
+    }
+
+    private function getConfigStringPDO()
+    {
+        return "{$this->_dbsm}:host={$this->_host};dbname={$this->_db_name}";
+    }
+
+    public function getConnection()
+    {
+        $PDO_options = array(
+            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+            \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC
+        );
+
+        if ($this->dsn === null) {
+            $dsl = $this->getConfigStringPDO();
+        } else {
+            $dsl = $this->dsn;
+        }
+
+        $this->_PDO = ($this->_PDO) ? $this->_PDO : new \PDO($dsl, $this->_user, $this->_password, $PDO_options);
+        return $this->_PDO;
+    }
+
+    public function closeConnection()
+    {
+        unset($this->_PDO);
+        $this->_PDO = null;
+    }
+
+    protected function save()
+    {
+        if(!is_null($this->getFieldsValues(Helper::FLD_ID)))
+            $this->update();
+        else
+            $this->insert();
+    }
+
+    protected function update()
+    {
+        if(is_null($this->getFieldsValues(Helper::FLD_ID)))
+            throw new Exception("For updating data needs value of field Helper::FLD_ID");
+
+        $fieldsValues = $this->getFieldsValues();
+        $sqlSetPart = [];
+        foreach($fieldsValues as $field => $value)
+            array_push($sqlSetPart, "{$field}='{$value}'");
+
+        $sql = "
+            UPDATE
+              {$this->_table_name}
+            SET
+              ".join("," ,$sqlSetPart)."
+            WHERE
+                ".$this->getIdFieldName()." = ".$this->getFieldsValues(Helper::FLD_ID)."
+        ";
+
+        if($this->config["debug"])
+            echo("Update operation sql: ".$sql."<BR>");
+
+        $this->getConnection()->prepare($sql)->execute();
+        $this->closeConnection();
+    }
+
+    protected function insert()
+    {
+        $fieldsValues = $this->getFieldsValues();
+        $sqlFields = join(",", array_keys($fieldsValues));
+        $sqlValues = "'".join("','", array_values($fieldsValues))."'";
+        $sql = "INSERT INTO {$this->_table_name} ({$sqlFields}) values ({$sqlValues})";
+
+        if($this->config["debug"])
+            echo("Insert operation sql: ".$sql."<BR>");
+
+        $this->getConnection()->prepare($sql)->execute();
+        $this->closeConnection();
+    }
+
+    protected function delete()
+    {
+        $dataId = $this->getFieldsValues(Helper::FLD_ID);
+        if(is_null($dataId))
+            throw new Exception("For deleting needs value of FLD_ID");
+
+        $sql = "
+            DELETE FROM
+                ".$this->_table_name."
+            WHERE
+                ".$this->getIdFieldName()." = '{$dataId}'";
+
+        if($this->config["debug"])
+            echo("Delete operation sql: ".$sql."<BR>");
+
+        $this->getConnection()->prepare($sql)->execute();
+        $this->closeConnection();
+    }
+}

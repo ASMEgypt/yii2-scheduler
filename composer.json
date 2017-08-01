@@ -1,0 +1,25 @@
+{
+  "name": "execut/yii2-scheduler",
+  "version": "0.0.1",
+  "description": "Scheduler module for yii2",
+  "keywords": ["yii2", "yii2 scheduler", "schedule"],
+  "homepage": "https://github.com/execut/yii2-import-scheduler",
+  "type": "yii2-extension",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "eXeCUT"
+    }
+  ],
+  "minimum-stability": "stable",
+  "require": {
+    "roopz/yii2-imap": "dev-master",
+    "dhtmlx/scheduler-helper": "dev-fix-bug as 1.2.0",
+    "dhtmlx/connector-php": "~3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "execut\\scheduler\\": ""
+    }
+  }
+}
